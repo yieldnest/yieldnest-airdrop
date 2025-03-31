@@ -9,7 +9,8 @@ import { TransparentUpgradeableProxy } from
     "lib/openzeppelin-contracts/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 import { OwnableUpgradeable } from "lib/openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol";
-import { PausableUpgradeable } from "lib/openzeppelin-contracts-upgradeable/contracts/utils/PausableUpgradeable.sol";
+import { PausableUpgradeable } from
+    "lib/openzeppelin-contracts-upgradeable/contracts/utils/PausableUpgradeable.sol";
 import { Math } from "lib/openzeppelin-contracts/contracts/utils/math/Math.sol";
 
 import { IERC20 } from "lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
@@ -18,18 +19,13 @@ import { Vm } from "forge-std/Vm.sol";
 
 import { MockERC20 } from "test/mock/MockERC20.sol";
 
-struct Points {
-    address user;
-    uint256 amount;
-}
-
 contract AirdropSampleDataTest is Test {
     Airdrop public airdropImplementation;
     Airdrop public airdrop;
     TransparentUpgradeableProxy public proxy;
     MockERC20 public token;
 
-    address public proxyAdmin = makeAddr("proxyAdmin");
+    address public proxyAdminOwner = makeAddr("proxyAdminOwner");
     address public owner = makeAddr("owner");
     address public safe = makeAddr("safe");
 
@@ -46,14 +42,10 @@ contract AirdropSampleDataTest is Test {
         UserAmount[] memory userAmounts = new UserAmount[](0);
 
         bytes memory initParams = abi.encodeWithSelector(
-            Airdrop.initialize.selector,
-            address(owner),
-            address(safe),
-            address(token),
-            userAmounts
+            Airdrop.initialize.selector, address(owner), address(safe), address(token), userAmounts
         );
 
-        proxy = new TransparentUpgradeableProxy(address(airdropImplementation), proxyAdmin, initParams);
+        proxy = new TransparentUpgradeableProxy(address(airdropImplementation), proxyAdminOwner, initParams);
 
         airdrop = Airdrop(address(proxy));
 
@@ -69,12 +61,12 @@ contract AirdropSampleDataTest is Test {
         string memory path = string(abi.encodePacked(vm.projectRoot(), "/test/utils/sample.json"));
         string memory json = vm.readFile(path);
 
-        bytes memory parsedPoints = vm.parseJson(json, ".userAmounts");
-        Points[] memory userAmounts = abi.decode(parsedPoints, (Points[]));
+        bytes memory parsedUserAmount = vm.parseJson(json, ".userAmounts");
+        UserAmount[] memory userAmounts = abi.decode(parsedUserAmount, (UserAmount[]));
 
-        uint256 totalPoints;
+        uint256 totalUserAmount;
         for (uint256 i; i < userAmounts.length; i++) {
-            totalPoints += userAmounts[i].amount;
+            totalUserAmount += userAmounts[i].amount;
         }
 
         UserAmount memory tempUserAmount;
@@ -83,7 +75,7 @@ contract AirdropSampleDataTest is Test {
                 continue;
             }
             tempUserAmount.user = userAmounts[i].user;
-            tempUserAmount.amount = Math.mulDiv(userAmounts[i].amount, sampleTotalAmount, totalPoints);
+            tempUserAmount.amount = Math.mulDiv(userAmounts[i].amount, sampleTotalAmount, totalUserAmount);
 
             sampleUserAmounts.push(tempUserAmount);
             sampleTotalAmount += tempUserAmount.amount;
@@ -144,13 +136,9 @@ contract AirdropSampleDataTest is Test {
 
     function testDeployWithSampleData() public {
         bytes memory initParams = abi.encodeWithSelector(
-            Airdrop.initialize.selector,
-            address(owner),
-            address(safe),
-            address(token),
-            sampleUserAmounts
+            Airdrop.initialize.selector, address(owner), address(safe), address(token), sampleUserAmounts
         );
 
-        new TransparentUpgradeableProxy(address(airdropImplementation), proxyAdmin, initParams);
+        new TransparentUpgradeableProxy(address(airdropImplementation), proxyAdminOwner, initParams);
     }
 }

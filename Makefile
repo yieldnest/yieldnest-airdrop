@@ -63,12 +63,6 @@ lint:
 format:
 	forge fmt --root .
 
-# make convert csv=script/input/ynETH.csv
-.PHONY: convert
-convert:
-	@if [ -z "${csv}" ]; then echo "Error: csv is required"; exit 1; fi
-	bash ./script/bash/convertCSVjson.sh ${csv}
-
 # make simulate json=script/inputs/season-one-eigen.json network=mainnet
 
 .PHONY: simulate

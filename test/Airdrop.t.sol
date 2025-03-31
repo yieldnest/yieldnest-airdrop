@@ -11,7 +11,8 @@ import { TransparentUpgradeableProxy } from
     "lib/openzeppelin-contracts/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 import { OwnableUpgradeable } from "lib/openzeppelin-contracts-upgradeable/contracts/access/OwnableUpgradeable.sol";
-import { PausableUpgradeable } from "lib/openzeppelin-contracts-upgradeable/contracts/utils/PausableUpgradeable.sol";
+import { PausableUpgradeable } from
+    "lib/openzeppelin-contracts-upgradeable/contracts/utils/PausableUpgradeable.sol";
 import { Math } from "lib/openzeppelin-contracts/contracts/utils/math/Math.sol";
 
 import { IERC20 } from "lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
@@ -20,13 +21,15 @@ import { Vm } from "forge-std/Vm.sol";
 
 import { MockERC20 } from "test/mock/MockERC20.sol";
 
+import { ProxyUtils } from "script/ProxyUtils.sol";
+
 contract AirdropTest is Test {
     Airdrop public airdrop;
     Airdrop public airdropImplementation;
     MockERC20 public token;
     TransparentUpgradeableProxy public proxy;
 
-    address public proxyAdmin = makeAddr("proxyAdmin");
+    address public proxyAdminOwner = makeAddr("proxyAdminOwner");
     address public owner = makeAddr("owner");
     address public safe = makeAddr("safe");
 
@@ -48,14 +51,10 @@ contract AirdropTest is Test {
         userAmounts[0] = UserAmount({ user: staker, amount: amount });
 
         bytes memory initParams = abi.encodeWithSelector(
-            Airdrop.initialize.selector,
-            address(owner),
-            address(safe),
-            address(token),
-            userAmounts
+            Airdrop.initialize.selector, address(owner), address(safe), address(token), userAmounts
         );
 
-        proxy = new TransparentUpgradeableProxy(address(airdropImplementation), proxyAdmin, initParams);
+        proxy = new TransparentUpgradeableProxy(address(airdropImplementation), proxyAdminOwner, initParams);
 
         airdrop = Airdrop(address(proxy));
 
@@ -66,12 +65,11 @@ contract AirdropTest is Test {
     }
 
     function testDefaults() public view {
-        bytes32 ADMIN_STORAGE_SLOT = 0xb53127684a568b3173ae13b9f8a6016e243e63b6e8ee1178d6a717850b5d6103;
-        bytes32 value = vm.load(address(proxy), ADMIN_STORAGE_SLOT);
-        ProxyAdmin proxyAdminContract = ProxyAdmin(address(uint160(uint256(value))));
+        address proxyAdmin = ProxyUtils.getProxyAdmin(address(airdrop));
+        ProxyAdmin proxyAdminContract = ProxyAdmin(proxyAdmin);
 
         assertEq(address(proxy), address(airdrop));
-        assertEq(address(proxyAdminContract.owner()), proxyAdmin);
+        assertEq(address(proxyAdminContract.owner()), proxyAdminOwner);
         assertEq(address(airdrop.safe()), address(safe));
         assertEq(address(airdrop.token()), address(token));
         assertEq(address(airdrop.owner()), owner);
@@ -83,31 +81,23 @@ contract AirdropTest is Test {
     function testInvalidInitialization() public {
         {
             bytes memory initParams = abi.encodeWithSelector(
-                Airdrop.initialize.selector,
-                address(0),
-                address(safe),
-                address(token),
-                new UserAmount[](0)
+                Airdrop.initialize.selector, address(0), address(safe), address(token), new UserAmount[](0)
             );
 
             bytes memory revertData =
                 abi.encodeWithSelector(OwnableUpgradeable.OwnableInvalidOwner.selector, address(0));
 
             vm.expectRevert(revertData);
-            new TransparentUpgradeableProxy(address(airdropImplementation), proxyAdmin, initParams);
+            new TransparentUpgradeableProxy(address(airdropImplementation), proxyAdminOwner, initParams);
         }
 
         {
             bytes memory initParams = abi.encodeWithSelector(
-                Airdrop.initialize.selector,
-                address(owner),
-                address(0),
-                address(token),
-                new UserAmount[](0)
+                Airdrop.initialize.selector, address(owner), address(0), address(token), new UserAmount[](0)
             );
 
             vm.expectRevert(IAirdrop.InvalidInit.selector);
-            new TransparentUpgradeableProxy(address(airdropImplementation), proxyAdmin, initParams);
+            new TransparentUpgradeableProxy(address(airdropImplementation), proxyAdminOwner, initParams);
         }
     }
 
@@ -255,5 +245,4 @@ contract AirdropTest is Test {
 
         assertEq(token.balanceOf(safe), INITIAL_BALANCE - amount * 2, "safe Balance");
     }
-
 }

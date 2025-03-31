@@ -8,5 +8,4 @@ contract BaseTest is Test {
 
     address internal constant YNSAFE = 0xCCB2FEB7d8e081dcedFe1CFbefC9d46Eb383E389;
     uint256 internal constant INITIAL_BALANCE = 0;
-
 }
