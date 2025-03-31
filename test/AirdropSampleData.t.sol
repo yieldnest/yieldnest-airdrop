@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.25;
 
-import { EigenAirdrop } from "../src/EigenAirdrop.sol";
-import { IEigenAirdrop, UserAmount } from "../src/IEigenAirdrop.sol";
+import { Airdrop } from "../src/Airdrop.sol";
+import { IAirdrop, UserAmount } from "../src/IAirdrop.sol";
 
-import { BaseTest } from "./BaseTest.t.sol";
+import { Test } from "forge-std/Test.sol";
 import { TransparentUpgradeableProxy } from
     "lib/openzeppelin-contracts/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
@@ -16,77 +16,79 @@ import { IERC20 } from "lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.
 
 import { Vm } from "forge-std/Vm.sol";
 
-import { Deposit, SigUtils } from "./utils/SigUtils.sol";
+import { MockERC20 } from "test/mock/MockERC20.sol";
 
-struct EigenPoints {
-    address addr;
-    uint256 points;
+struct Points {
+    address user;
+    uint256 amount;
 }
 
-contract EigenAirdropSampleDataTest is BaseTest {
-    EigenAirdrop public airdropImplementation;
-    EigenAirdrop public airdrop;
+contract AirdropSampleDataTest is Test {
+    Airdrop public airdropImplementation;
+    Airdrop public airdrop;
     TransparentUpgradeableProxy public proxy;
+    MockERC20 public token;
 
     address public proxyAdmin = makeAddr("proxyAdmin");
     address public owner = makeAddr("owner");
-    uint256 public amount = 1_000_000_000_000_000_000;
+    address public safe = makeAddr("safe");
 
     UserAmount[] public sampleUserAmounts;
-    uint256 public sampleTotalAmounts;
+    uint256 public sampleTotalAmount = 0;
 
-    function setUp() public override {
-        super.setUp();
+    uint256 public amount = 1 ether;
 
-        airdropImplementation = new EigenAirdrop();
+    function setUp() public {
+        token = new MockERC20("Token", "TKN", 18);
+
+        airdropImplementation = new Airdrop();
 
         UserAmount[] memory userAmounts = new UserAmount[](0);
 
         bytes memory initParams = abi.encodeWithSelector(
-            EigenAirdrop.initialize.selector,
+            Airdrop.initialize.selector,
             address(owner),
-            address(YNSAFE),
-            address(EIGEN),
-            address(STRATEGY),
-            address(STRATEGY_MANAGER),
+            address(safe),
+            address(token),
             userAmounts
         );
 
         proxy = new TransparentUpgradeableProxy(address(airdropImplementation), proxyAdmin, initParams);
 
-        airdrop = EigenAirdrop(address(proxy));
-
-        vm.prank(YNSAFE);
-        EIGEN.approve(address(airdrop), INITIAL_BALANCE);
+        airdrop = Airdrop(address(proxy));
 
         _loadSample();
+
+        deal(address(token), safe, sampleTotalAmount);
+
+        vm.prank(safe);
+        token.approve(address(airdrop), sampleTotalAmount);
     }
 
     function _loadSample() internal {
         string memory path = string(abi.encodePacked(vm.projectRoot(), "/test/utils/sample.json"));
         string memory json = vm.readFile(path);
 
-        bytes memory parsedEigenPoints = vm.parseJson(json, ".eigenPoints");
-        EigenPoints[] memory eigenPoints = abi.decode(parsedEigenPoints, (EigenPoints[]));
+        bytes memory parsedPoints = vm.parseJson(json, ".userAmounts");
+        Points[] memory userAmounts = abi.decode(parsedPoints, (Points[]));
 
         uint256 totalPoints;
-        for (uint256 i; i < eigenPoints.length; i++) {
-            totalPoints += eigenPoints[i].points;
+        for (uint256 i; i < userAmounts.length; i++) {
+            totalPoints += userAmounts[i].amount;
         }
 
         UserAmount memory tempUserAmount;
-        for (uint256 i; i < eigenPoints.length; i++) {
-            if (eigenPoints[i].points == 0) {
+        for (uint256 i; i < userAmounts.length; i++) {
+            if (userAmounts[i].amount == 0) {
                 continue;
             }
-            tempUserAmount.user = eigenPoints[i].addr;
-            tempUserAmount.amount = Math.mulDiv(eigenPoints[i].points, INITIAL_BALANCE, totalPoints);
+            tempUserAmount.user = userAmounts[i].user;
+            tempUserAmount.amount = Math.mulDiv(userAmounts[i].amount, sampleTotalAmount, totalPoints);
 
             sampleUserAmounts.push(tempUserAmount);
-            sampleTotalAmounts += tempUserAmount.amount;
+            sampleTotalAmount += tempUserAmount.amount;
         }
 
-        assertEq(sampleTotalAmounts <= INITIAL_BALANCE, true, "Total Amounts");
         assertEq(sampleUserAmounts.length > 0, true, "Sample User Amounts");
     }
 
@@ -126,28 +128,26 @@ contract EigenAirdropSampleDataTest is BaseTest {
                 continue;
             }
 
-            uint256 beforeBalance = EIGEN.balanceOf(sampleUserAmounts[i].user);
+            uint256 beforeBalance = token.balanceOf(sampleUserAmounts[i].user);
 
             vm.prank(sampleUserAmounts[i].user);
             airdrop.claim(sampleUserAmounts[i].amount);
 
-            uint256 afterBalance = EIGEN.balanceOf(sampleUserAmounts[i].user);
+            uint256 afterBalance = token.balanceOf(sampleUserAmounts[i].user);
             assertEq(afterBalance - beforeBalance, sampleUserAmounts[i].amount);
 
             claimedAmount += sampleUserAmounts[i].amount;
         }
 
-        assertEq(EIGEN.balanceOf(YNSAFE), INITIAL_BALANCE - claimedAmount, "YNSAFE Balance");
+        assertEq(token.balanceOf(safe), sampleTotalAmount - claimedAmount, "safe Balance");
     }
 
     function testDeployWithSampleData() public {
         bytes memory initParams = abi.encodeWithSelector(
-            EigenAirdrop.initialize.selector,
+            Airdrop.initialize.selector,
             address(owner),
-            address(YNSAFE),
-            address(EIGEN),
-            address(STRATEGY),
-            address(STRATEGY_MANAGER),
+            address(safe),
+            address(token),
             sampleUserAmounts
         );
 
