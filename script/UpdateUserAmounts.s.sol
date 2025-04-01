@@ -11,7 +11,8 @@ import { Strings } from "lib/openzeppelin-contracts/contracts/utils/Strings.sol"
 
 import { console } from "forge-std/console.sol";
 
-// source .env && forge script script/UpdateUserAmounts.s.sol:UpdateUserAmounts --rpc-url $HOLESKY_RPC_URL --sender $DEPLOYER_ADDRESS --account $DEPLOYER_ACCOUNT_NAME
+// source .env && forge script script/UpdateUserAmounts.s.sol:UpdateUserAmounts --rpc-url $HOLESKY_RPC_URL --sender
+// $DEPLOYER_ADDRESS --account $DEPLOYER_ACCOUNT_NAME
 contract UpdateUserAmounts is BaseScript {
     Airdrop public eigenAirdrop;
     Airdrop public eigenAirdropImpl;

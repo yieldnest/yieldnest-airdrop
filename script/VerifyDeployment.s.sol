@@ -15,7 +15,9 @@ import { console } from "forge-std/console.sol";
 
 import { ProxyUtils } from "./ProxyUtils.sol";
 
-// source .env && forge script script/VerifyDeployment.s.sol:VerifyAirdrop -s "run(string)" script/inputs/season-one-eigen-holesky.json --rpc-url $HOLESKY_RPC_URL --sender $DEPLOYER_ADDRESS --account $DEPLOYER_ACCOUNT_NAME
+// source .env && forge script script/VerifyDeployment.s.sol:VerifyAirdrop -s "run(string)"
+// script/inputs/season-one-eigen-holesky.json --rpc-url $HOLESKY_RPC_URL --sender $DEPLOYER_ADDRESS --account
+// $DEPLOYER_ACCOUNT_NAME
 contract VerifyAirdrop is BaseScript {
     Airdrop public airdrop;
     Airdrop public airdropImpl;
