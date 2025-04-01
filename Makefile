@@ -1,6 +1,6 @@
 # Default values
-json ?= script/inputs/season-one-eigen.json
-network ?= mainnet
+json ?= script/inputs/season-one-eigen-holesky.json
+network ?= holesky
 deployerAccountName := $(shell grep '^DEPLOYER_ACCOUNT_NAME=' .env | cut -d '=' -f2)
 deployerAddress := $(shell grep '^DEPLOYER_ADDRESS=' .env | cut -d '=' -f2)
 
@@ -63,21 +63,28 @@ lint:
 format:
 	forge fmt --root .
 
-# make simulate json=script/inputs/season-one-eigen.json network=mainnet
+# make simulate json=script/inputs/season-one-eigen-holesky.json network=holesky
 
 .PHONY: simulate
 simulate:
 	@if [ -z "${network}" ]; then echo "Error: network is required"; exit 1; fi
-	@if [ -z "${json}" ]; then echo "Error: json is required"; exit 1; fi
+	@if [ -z "${json}" ]; then echo "Error: input json is required"; exit 1; fi
 	@if [ -z "${deployerAccountName}" ]; then echo "Error: deployerAccountName is required"; exit 1; fi
 	@if [ -z "${deployerAddress}" ]; then echo "Error: deployerAddress is required"; exit 1; fi
-	forge script DeployEigenAirdrop --sig "run(string memory)" ${json} --rpc-url ${network} --account ${deployerAccountName} --sender ${deployerAddress} --slow
+	forge script DeployAirdrop --sig "run(string memory)" ${json} --rpc-url ${network} --account ${deployerAccountName} --sender ${deployerAddress} --slow
 
-# make deploy json=script/inputs/season-one-eigen.json network=mainnet
+# make deploy json=script/inputs/season-one-eigen-holesky.json network=holesky
 .PHONY: deploy
 deploy:
 	@if [ -z "${network}" ]; then echo "Error: network is required"; exit 1; fi
-	@if [ -z "${json}" ]; then echo "Error: json is required"; exit 1; fi
+	@if [ -z "${json}" ]; then echo "Error: input json is required"; exit 1; fi
 	@if [ -z "${deployerAccountName}" ]; then echo "Error: deployerAccountName is required"; exit 1; fi
 	@if [ -z "${deployerAddress}" ]; then echo "Error: deployerAddress is required"; exit 1; fi
-	forge script DeployEigenAirdrop --sig "run(string memory)" ${json} --rpc-url ${network} --account ${deployerAccountName} --sender ${deployerAddress} --slow --broadcast --verify
+	forge script DeployAirdrop --sig "run(string memory)" ${json} --rpc-url ${network} --account ${deployerAccountName} --sender ${deployerAddress} --slow --broadcast --verify
+
+# make verify json=script/inputs/season-one-eigen-holesky.json network=holesky
+.PHONY: verify
+verify:
+	@if [ -z "${network}" ]; then echo "Error: network is required"; exit 1; fi
+	@if [ -z "${json}" ]; then echo "Error: input json is required"; exit 1; fi
+	forge script VerifyAirdrop --sig "run(string memory)" ${json} --rpc-url ${network}

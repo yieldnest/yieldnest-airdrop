@@ -79,10 +79,11 @@ contract DeployAirdrop is BaseScript {
 
     function _save() internal {
         string memory json;
-        vm.serializeAddress(json, "airdropProxy", address(airdrop));
         vm.serializeAddress(json, "airdropImplementation", address(airdropImpl));
+        vm.serializeAddress(json, "airdropProxy", address(airdrop));
         vm.serializeAddress(json, "owner", data.airdropOwner);
         vm.serializeAddress(json, "proxyAdmin", address(proxyAdmin));
+        vm.serializeAddress(json, "proxyAdminOwner", data.proxyAdminOwner);
         vm.serializeAddress(json, "rewardsSafe", rewardsSafe);
         vm.serializeAddress(json, "token", token);
         vm.serializeUint(json, "totalAmount", totalAmount);

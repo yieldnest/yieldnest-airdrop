@@ -3,24 +3,24 @@
   "rewardsSafe": "0x8BC702B8708d55F24Ec26ca8f151eC7a1B2A6441",
   "userAmounts": [
     {
-      "user": "0xB9779AeC32f4cbF376F325d8c393B0D2711874eD",
-      "amount": 1000000000000000000
+      "amount": 1000000000000000000,
+      "user": "0xB9779AeC32f4cbF376F325d8c393B0D2711874eD"
     },
     {
-      "user": "0x72fdBD51085bDa5eEEd3b55D1A46E2e92f0837a5",
-      "amount": 1000000000000000000
+      "amount": 1000000000000000000,
+      "user": "0x72fdBD51085bDa5eEEd3b55D1A46E2e92f0837a5"
     },
     {
-      "user": "0xd7d4A7f14265B0A69AE482b85B0a8496c3F99fb9",
-      "amount": 500000000000000000
+      "amount": 500000000000000000,
+      "user": "0xd7d4A7f14265B0A69AE482b85B0a8496c3F99fb9"
     },
     {
-      "user": "0xe7f4DDE279D9278C92D7008f240D23Ecd45280d8",
-      "amount": 300000000000000000
+      "amount": 300000000000000000,
+      "user": "0xe7f4DDE279D9278C92D7008f240D23Ecd45280d8"
     },
     {
-      "user": "0xC118488EcfE46E6357B27EaE18A85064DCE0eB0f",
-      "amount": 1000000000000000000
+      "amount": 1000000000000000000,
+      "user": "0xC118488EcfE46E6357B27EaE18A85064DCE0eB0f"
     }
   ]
 }

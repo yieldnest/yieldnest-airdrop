@@ -15,25 +15,23 @@ import { console } from "forge-std/console.sol";
 
 import { ProxyUtils } from "./ProxyUtils.sol";
 
-// source .env && forge script script/VerifyDeployment.s.sol:VerifyAirdrop -s "run(string)"
-// script/inputs/season-one-eigen-holesky.json --rpc-url $HOLESKY_RPC_URL --sender $DEPLOYER_ADDRESS --account
-// $DEPLOYER_ACCOUNT_NAME
+// forge script script/VerifyAirdrop.s.sol:VerifyAirdrop -s "run(string)"
+// script/inputs/season-one-eigen-holesky.json --rpc-url holesky
 contract VerifyAirdrop is BaseScript {
-    Airdrop public airdrop;
-    Airdrop public airdropImpl;
-    ProxyAdmin public proxyAdmin;
     Deployment public deployment;
 
+    // @dev Order of the struct fields matters, it should be alphabetical
     struct Deployment {
-        address airdropProxy;
         address airdropImplementation;
-        address proxyAdmin;
+        address airdropProxy;
+        address deployer;
+        uint256 initialSafeBalance;
         address owner;
+        address proxyAdmin;
         address proxyAdminOwner;
         address rewardsSafe;
         address token;
         uint256 totalAmount;
-        uint256 initialSafeBalance;
     }
 
     error InvalidDeployment();
@@ -41,11 +39,11 @@ contract VerifyAirdrop is BaseScript {
     function run(string memory _path) public {
         _loadInput(_path);
         deployment = _loadDeployment();
-
         _verify();
     }
 
-    function _verify() internal {
+    function _verify() internal view {
+        console.log("Airdrop Deployer:", deployment.deployer);
         console.log("Airdrop Proxy:", deployment.airdropProxy);
         console.log("Airdrop Implementation:", deployment.airdropImplementation);
         console.log("Proxy Admin:", deployment.proxyAdmin);
@@ -56,13 +54,6 @@ contract VerifyAirdrop is BaseScript {
         console.log("Total Amount:", deployment.totalAmount);
         console.log("Initial Safe Balance:", deployment.initialSafeBalance);
 
-        // Initialize Airdrop instance
-        airdrop = Airdrop(deployment.airdropProxy);
-        if (airdrop.paused()) {
-            revert("Airdrop is paused when it should not be");
-        }
-        console.log("\u2705 Airdrop is not paused");
-
         _verifyViewFunctions();
 
         _verifyProxyAdmin();
@@ -72,10 +63,13 @@ contract VerifyAirdrop is BaseScript {
         console.log("Deployment verified successfully");
     }
 
-    function _verifyProxyAdmin() internal {
+    function _verifyProxyAdmin() internal view {
         // Verify ProxyAdmin owner
-        address proxyAdminAddress = ProxyUtils.getProxyAdmin(deployment.airdropProxy);
-        proxyAdmin = ProxyAdmin(proxyAdminAddress);
+        ProxyAdmin proxyAdmin = ProxyAdmin(deployment.proxyAdmin);
+
+        if (address(ProxyUtils.getProxyAdmin(deployment.airdropProxy)) != deployment.proxyAdmin) {
+            revert("ProxyAdmin address mismatch");
+        }
 
         if (proxyAdmin.owner() != deployment.proxyAdminOwner) {
             console.log("Expected ProxyAdmin owner:", deployment.proxyAdminOwner);
@@ -87,8 +81,17 @@ contract VerifyAirdrop is BaseScript {
     }
 
     function _verifyViewFunctions() internal view {
+        Airdrop airdrop = Airdrop(deployment.airdropProxy);
+
         // Verify view functions
+        if (airdrop.paused()) {
+            revert("Airdrop is paused when it should not be");
+        }
+        console.log("\u2705 Airdrop is not paused");
+
         if (airdrop.owner() != data.airdropOwner) {
+            console.log("Expected Airdrop owner:", data.airdropOwner);
+            console.log("Actual Airdrop owner:", airdrop.owner());
             revert("Airdrop owner verification failed");
         }
         console.log("\u2705 Airdrop owner verified successfully: ", airdrop.owner());
@@ -105,6 +108,8 @@ contract VerifyAirdrop is BaseScript {
     }
 
     function _verifyTotalAmount() internal view {
+        Airdrop airdrop = Airdrop(deployment.airdropProxy);
+
         // Verify user amounts
         uint256 totalTokens = 0;
         for (uint256 i = 0; i < userAmounts.length; i++) {
@@ -129,32 +134,9 @@ contract VerifyAirdrop is BaseScript {
         console.log("Total tokens: ", totalTokens);
     }
 
-    function _loadDeployment() internal view returns (Deployment memory) {
+    function _loadDeployment() internal view returns (Deployment memory d) {
         string memory json = vm.readFile(_getDeploymentFile());
-
-        address airdropProxy = abi.decode(vm.parseJson(json, ".airdropProxy"), (address));
-
-        address airdropImplementation = abi.decode(vm.parseJson(json, ".airdropImplementation"), (address));
-        address proxyAdminAddress = abi.decode(vm.parseJson(json, ".proxyAdmin"), (address));
-        address owner = abi.decode(vm.parseJson(json, ".owner"), (address));
-        address proxyAdminOwner = abi.decode(vm.parseJson(json, ".proxyAdmin"), (address));
-        address rewardsSafe = abi.decode(vm.parseJson(json, ".rewardsSafe"), (address));
-        address tokenAddress = abi.decode(vm.parseJson(json, ".token"), (address));
-        uint256 totalAmount = abi.decode(vm.parseJson(json, ".totalAmount"), (uint256));
-        uint256 initialSafeBalance = abi.decode(vm.parseJson(json, ".initialSafeBalance"), (uint256));
-
+        d = abi.decode(vm.parseJson(json), (Deployment));
         console.log("Loaded deployment from:", _getDeploymentFile());
-
-        return Deployment({
-            airdropProxy: airdropProxy,
-            airdropImplementation: airdropImplementation,
-            proxyAdmin: proxyAdminAddress,
-            owner: owner,
-            proxyAdminOwner: proxyAdminOwner,
-            rewardsSafe: rewardsSafe,
-            token: tokenAddress,
-            totalAmount: totalAmount,
-            initialSafeBalance: initialSafeBalance
-        });
     }
 }

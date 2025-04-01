@@ -6,8 +6,9 @@ import { IERC20 } from "lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.
 /**
  * @title UserAmount
  * @dev Struct representing a user and their claimable token amount.
- * @param user The address of the user eligible for the airdrop.
+ * @dev Order of the struct is alphabetical to facilitate JSON parsing in the scripts.
  * @param amount The amount of tokens claimable by the user.
+ * @param user The address of the user eligible for the airdrop.
  */
 struct UserAmount {
     uint256 amount;
