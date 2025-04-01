@@ -6,6 +6,8 @@ import { BaseData } from "./BaseData.s.sol";
 import { console } from "forge-std/console.sol";
 import { IERC20Metadata as IERC20 } from
     "lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol";
+
+import { Strings } from "lib/openzeppelin-contracts/contracts/utils/Strings.sol";
 import { Math } from "lib/openzeppelin-contracts/contracts/utils/math/Math.sol";
 
 import { UserAmount } from "../src/IAirdrop.sol";
@@ -43,13 +45,22 @@ contract BaseScript is BaseData {
 
         bytes memory parsedUserAmount = vm.parseJson(json, ".userAmounts");
         UserAmount[] memory userAmount = abi.decode(parsedUserAmount, (UserAmount[]));
+        uint256 length = userAmount.length;
 
         delete userAmounts;
 
         totalAmount = 0;
+
         for (uint256 i; i < userAmount.length; i++) {
-            userAmounts.push(userAmount[i]);
-            totalAmount += userAmount[i].amount;
+            // had to parse the amounts like this because the parsed json was returning the wrong values
+            string memory userPath = string.concat(".userAmounts[", vm.toString(i), "].user");
+            string memory amountPath = string.concat(".userAmounts[", vm.toString(i), "].amount");
+
+            address user = vm.parseJsonAddress(json, userPath);
+            uint256 amount = vm.parseJsonUint(json, amountPath);
+
+            userAmounts.push(UserAmount({ user: user, amount: amount }));
+            totalAmount += amount;
         }
 
         initialSafeBalance = IERC20(token).balanceOf(rewardsSafe);
