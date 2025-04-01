@@ -52,11 +52,8 @@ contract BaseScript is BaseData {
 
         for (uint256 i; i < userAmount.length; i++) {
             // had to parse the amounts like this because the parsed json was returning the wrong values
-            string memory userPath = string.concat(".userAmounts[", vm.toString(i), "].user");
-            string memory amountPath = string.concat(".userAmounts[", vm.toString(i), "].amount");
-
-            address user = vm.parseJsonAddress(json, userPath);
-            uint256 amount = vm.parseJsonUint(json, amountPath);
+            address user = userAmount[i].user;
+            uint256 amount = userAmount[i].amount;
 
             userAmounts.push(UserAmount({ user: user, amount: amount }));
             totalAmount += amount;

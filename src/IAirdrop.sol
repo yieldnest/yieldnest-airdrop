@@ -10,8 +10,8 @@ import { IERC20 } from "lib/openzeppelin-contracts/contracts/token/ERC20/IERC20.
  * @param amount The amount of tokens claimable by the user.
  */
 struct UserAmount {
-    address user;
     uint256 amount;
+    address user;
 }
 
 /**
