@@ -45,7 +45,6 @@ contract BaseScript is BaseData {
 
         bytes memory parsedUserAmount = vm.parseJson(json, ".userAmounts");
         UserAmount[] memory userAmount = abi.decode(parsedUserAmount, (UserAmount[]));
-        uint256 length = userAmount.length;
 
         delete userAmounts;
 

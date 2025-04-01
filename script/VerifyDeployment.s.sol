@@ -15,6 +15,7 @@ import { console } from "forge-std/console.sol";
 
 import { ProxyUtils } from "./ProxyUtils.sol";
 
+// source .env && forge script script/VerifyDeployment.s.sol:VerifyAirdrop -s "run(string)" script/inputs/season-one-eigen-holesky.json --rpc-url $HOLESKY_RPC_URL --sender $DEPLOYER_ADDRESS --account $DEPLOYER_ACCOUNT_NAME
 contract VerifyAirdrop is BaseScript {
     Airdrop public airdrop;
     Airdrop public airdropImpl;
@@ -134,7 +135,7 @@ contract VerifyAirdrop is BaseScript {
         address airdropImplementation = abi.decode(vm.parseJson(json, ".airdropImplementation"), (address));
         address proxyAdminAddress = abi.decode(vm.parseJson(json, ".proxyAdmin"), (address));
         address owner = abi.decode(vm.parseJson(json, ".owner"), (address));
-        address proxyAdminOwner = abi.decode(vm.parseJson(json, ".proxyAdminOwner"), (address));
+        address proxyAdminOwner = abi.decode(vm.parseJson(json, ".proxyAdmin"), (address));
         address rewardsSafe = abi.decode(vm.parseJson(json, ".rewardsSafe"), (address));
         address tokenAddress = abi.decode(vm.parseJson(json, ".token"), (address));
         uint256 totalAmount = abi.decode(vm.parseJson(json, ".totalAmount"), (uint256));
