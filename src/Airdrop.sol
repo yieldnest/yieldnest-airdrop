@@ -14,7 +14,7 @@ import { IAirdrop, UserAmount } from "./IAirdrop.sol";
 
 /**
  * @title Airdrop
- * @dev A contract that manages token airdrops and allows users to claim and restake tokens.
+ * @dev A contract that manages token airdrops and allows users to claim tokens stored in a safe.
  */
 contract Airdrop is IAirdrop, OwnableUpgradeable, PausableUpgradeable, ReentrancyGuardUpgradeable {
     using SafeERC20 for IERC20;
