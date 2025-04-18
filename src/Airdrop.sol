@@ -128,8 +128,8 @@ contract Airdrop is IAirdrop, OwnableUpgradeable, PausableUpgradeable, Reentranc
         whenNotPaused
         whenAvailable(_amountToClaim)
     {
-        token.safeTransferFrom(safe, msg.sender, _amountToClaim);
         amounts[msg.sender] -= _amountToClaim;
+        token.safeTransferFrom(safe, msg.sender, _amountToClaim);
         emit Claimed(msg.sender, _amountToClaim);
     }
 }
