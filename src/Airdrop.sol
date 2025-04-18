@@ -93,10 +93,11 @@ contract Airdrop is IAirdrop, OwnableUpgradeable, PausableUpgradeable, Reentranc
     function unpause() external onlyOwner whenPaused {
         _unpause();
     }
-
     /**
-     * @notice Updates user amount for the airdrop. Only callable by the owner when the contract is paused.
-     * @param _userAmounts An array of updated user amount.
+     * @notice Updates user amounts for the airdrop. Only callable by the owner when the contract is paused.
+     * @dev Note this function can be front-run by a claimant to claim before the amount is updated
+     *      if amount is non-zero.
+     * @param _userAmounts An array of updated user amounts.
      */
     function updateUserAmounts(UserAmount[] calldata _userAmounts) external onlyOwner whenPaused {
         _updateUserAmounts(_userAmounts);
