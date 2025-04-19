@@ -1,21 +1,18 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.25 <0.9.0;
 
-import { Airdrop, IAirdrop, UserAmount } from "../src/Airdrop.sol";
+import { Airdrop } from "../src/Airdrop.sol";
 
-import { BaseScript } from "./BaseScript.s.sol";
-import { TransparentUpgradeableProxy } from
-    "lib/openzeppelin-contracts/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
-import { Address } from "lib/openzeppelin-contracts/contracts/utils/Address.sol";
-import { Strings } from "lib/openzeppelin-contracts/contracts/utils/Strings.sol";
+import { BaseScript } from "script/BaseScript.s.sol";
+import { BatchUpdate } from "script/BatchUpdate.sol";
 
 import { console } from "forge-std/console.sol";
 
 // source .env && forge script script/UpdateUserAmounts.s.sol:UpdateUserAmounts --rpc-url $HOLESKY_RPC_URL --sender
 // $DEPLOYER_ADDRESS --account $DEPLOYER_ACCOUNT_NAME
-contract UpdateUserAmounts is BaseScript {
-    Airdrop public eigenAirdrop;
-    Airdrop public eigenAirdropImpl;
+contract UpdateUserAmounts is BaseScript, BatchUpdate {
+    Airdrop public airdrop;
+    uint256 public constant BATCH_SIZE = 800;
 
     error InvalidDeployment();
 
@@ -30,14 +27,22 @@ contract UpdateUserAmounts is BaseScript {
         vm.startBroadcast();
 
         // Create an instance of the Airdrop contract at the specified address
-        eigenAirdrop = Airdrop(0xEedc5467f6cc6736f5A97722cc1c8382A32170c5);
+        airdrop = Airdrop(0xEedc5467f6cc6736f5A97722cc1c8382A32170c5);
 
-        // Call updateUserAmounts with the loaded user amounts
-        eigenAirdrop.updateUserAmounts(userAmounts);
+        if (!airdrop.paused()) {
+            airdrop.pause();
+            console.log("Paused Airdrop for updating user amounts");
+        }
+
+        // Call updateUserAmounts with the loaded user amounts in batches
+        updateUserAmountsInBatches(airdrop, userAmounts, BATCH_SIZE);
+
+        airdrop.unpause();
+        console.log("Unpaused Airdrop");
 
         // Stop broadcasting transactions
         vm.stopBroadcast();
 
-        console.log("User amounts updated successfully for Airdrop at", address(eigenAirdrop));
+        console.log("User amounts updated successfully for Airdrop at", address(airdrop));
     }
 }

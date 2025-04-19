@@ -1,8 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.25;
 
-import { Airdrop } from "../src/Airdrop.sol";
-import { IAirdrop, UserAmount } from "../src/IAirdrop.sol";
+import { Airdrop, IAirdrop, UserAmount } from "src/Airdrop.sol";
 
 import { Test } from "forge-std/Test.sol";
 import { TransparentUpgradeableProxy } from
@@ -19,7 +18,9 @@ import { Vm } from "forge-std/Vm.sol";
 
 import { MockERC20 } from "test/mock/MockERC20.sol";
 
-contract AirdropSampleDataTest is Test {
+import { BatchUpdate } from "script/BatchUpdate.sol";
+
+contract AirdropSampleDataTest is Test, BatchUpdate {
     Airdrop public airdropImplementation;
     Airdrop public airdrop;
     TransparentUpgradeableProxy public proxy;
@@ -91,6 +92,22 @@ contract AirdropSampleDataTest is Test {
 
         vm.prank(owner);
         airdrop.updateUserAmounts(sampleUserAmounts);
+
+        for (uint256 i; i < sampleUserAmounts.length; i++) {
+            assertEq(airdrop.amounts(sampleUserAmounts[i].user), sampleUserAmounts[i].amount);
+        }
+    }
+
+    function testUpdateUserAmountsInBatches() public {
+        vm.prank(owner);
+        airdrop.pause();
+        assertEq(airdrop.paused(), true);
+
+        uint256 batchSize = 200;
+
+        vm.startPrank(owner);
+        updateUserAmountsInBatches(airdrop, sampleUserAmounts, batchSize);
+        vm.stopPrank();
 
         for (uint256 i; i < sampleUserAmounts.length; i++) {
             assertEq(airdrop.amounts(sampleUserAmounts[i].user), sampleUserAmounts[i].amount);

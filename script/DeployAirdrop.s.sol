@@ -1,27 +1,26 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.25 <0.9.0;
 
-import { Airdrop, IAirdrop, UserAmount } from "../src/Airdrop.sol";
-
-import { BaseScript } from "./BaseScript.s.sol";
+import { Airdrop, UserAmount } from "src/Airdrop.sol";
 
 import { ProxyAdmin } from "lib/openzeppelin-contracts/contracts/proxy/transparent/ProxyAdmin.sol";
 import { TransparentUpgradeableProxy } from
     "lib/openzeppelin-contracts/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
-import { Address } from "lib/openzeppelin-contracts/contracts/utils/Address.sol";
-import { Strings } from "lib/openzeppelin-contracts/contracts/utils/Strings.sol";
 
 import { console } from "forge-std/console.sol";
 
+import { BaseScript } from "script/BaseScript.s.sol";
+import { BatchUpdate } from "script/BatchUpdate.sol";
 import { ProxyUtils } from "script/ProxyUtils.sol";
 
 // source .env && forge script script/DeployAirdrop.s.sol:DeployAirdrop -s "run(string)"
 // script/inputs/season-one-eigen-holesky.json --rpc-url $HOLESKY_RPC_URL --sender $DEPLOYER_ADDRESS --account
 // $DEPLOYER_ACCOUNT_NAME --broadcast --verify --etherscan-api-key $ETHERSCAN_API_KEY
-contract DeployAirdrop is BaseScript {
+contract DeployAirdrop is BaseScript, BatchUpdate {
     Airdrop public airdrop;
     Airdrop public airdropImpl;
     ProxyAdmin public proxyAdmin;
+    uint256 public constant BATCH_SIZE = 800;
 
     error InvalidDeployment();
 
@@ -41,18 +40,33 @@ contract DeployAirdrop is BaseScript {
 
         airdropImpl = new Airdrop();
 
-        console.log("Deployed Airdrop implementation at address: ", address(airdropImpl));
+        console.log("Deployed Airdrop implementation: ", address(airdropImpl));
 
         TransparentUpgradeableProxy proxy =
             new TransparentUpgradeableProxy(address(airdropImpl), data.proxyAdminOwner, "");
 
-        console.log("Deployed Airdrop proxy at address: ", address(proxy));
+        console.log("Deployed Airdrop proxy: ", address(proxy));
 
         airdrop = Airdrop(address(proxy));
 
-        airdrop.initialize(data.airdropOwner, rewardsSafe, token, userAmounts);
+        UserAmount[] memory _userAmounts = new UserAmount[](0);
+        airdrop.initialize(deployer, rewardsSafe, token, _userAmounts);
 
-        console.log("Initialized Airdrop with owner: ", data.airdropOwner);
+        console.log("Initialized Airdrop");
+
+        airdrop.pause();
+        console.log("Paused Airdrop for updating user amounts");
+
+        updateUserAmountsInBatches(airdrop, userAmounts, BATCH_SIZE);
+
+        console.log("Updated user amounts");
+
+        airdrop.unpause();
+        console.log("Unpaused Airdrop");
+
+        airdrop.transferOwnership(data.airdropOwner);
+
+        console.log("Transferred ownership to", data.airdropOwner);
 
         vm.stopBroadcast();
 
