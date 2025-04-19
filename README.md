@@ -19,9 +19,6 @@ This repository includes:
 - **Deployment Scripts**:
   - `DeployAirdrop.s.sol`: Script to deploy the `Airdrop` contract.
 
-- **Utilities**:
-  - `convertCSVjson.sh`: Bash script for converting CSV input data into JSON format for use in the deployment scripts.
-
 ## Prerequisites
 
 - **Foundry**: A fast, portable, and modular toolkit for Ethereum development.
