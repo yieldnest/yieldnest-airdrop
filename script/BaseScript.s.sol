@@ -3,12 +3,8 @@ pragma solidity >=0.8.25 <0.9.0;
 
 import { BaseData } from "./BaseData.s.sol";
 
-import { console } from "forge-std/console.sol";
 import { IERC20Metadata as IERC20 } from
     "lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol";
-
-import { Strings } from "lib/openzeppelin-contracts/contracts/utils/Strings.sol";
-import { Math } from "lib/openzeppelin-contracts/contracts/utils/math/Math.sol";
 
 import { UserAmount } from "../src/IAirdrop.sol";
 

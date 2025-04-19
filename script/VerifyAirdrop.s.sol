@@ -1,19 +1,14 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity >=0.8.25 <0.9.0;
 
-import { Airdrop, IAirdrop, UserAmount } from "../src/Airdrop.sol";
-
-import { BaseScript } from "./BaseScript.s.sol";
+import { Airdrop, UserAmount } from "src/Airdrop.sol";
 
 import { ProxyAdmin } from "lib/openzeppelin-contracts/contracts/proxy/transparent/ProxyAdmin.sol";
-import { TransparentUpgradeableProxy } from
-    "lib/openzeppelin-contracts/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
-import { Address } from "lib/openzeppelin-contracts/contracts/utils/Address.sol";
-import { Strings } from "lib/openzeppelin-contracts/contracts/utils/Strings.sol";
 
 import { console } from "forge-std/console.sol";
 
-import { ProxyUtils } from "./ProxyUtils.sol";
+import { BaseScript } from "script/BaseScript.s.sol";
+import { ProxyUtils } from "script/ProxyUtils.sol";
 
 // forge script script/VerifyAirdrop.s.sol:VerifyAirdrop -s "run(string)"
 // script/inputs/season-one-eigen-holesky.json --rpc-url holesky
@@ -50,7 +45,7 @@ contract VerifyAirdrop is BaseScript {
         console.log("Owner:", deployment.owner);
         console.log("Proxy Admin Owner:", deployment.proxyAdminOwner);
         console.log("Rewards Safe:", deployment.rewardsSafe);
-        console.log(" Token:", deployment.token);
+        console.log("Token:", deployment.token);
         console.log("Total Amount:", deployment.totalAmount);
         console.log("Initial Safe Balance:", deployment.initialSafeBalance);
 

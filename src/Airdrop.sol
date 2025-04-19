@@ -99,6 +99,7 @@ contract Airdrop is IAirdrop, OwnableUpgradeable, PausableUpgradeable, Reentranc
      *      if amount is non-zero.
      * @param _userAmounts An array of updated user amounts.
      */
+
     function updateUserAmounts(UserAmount[] calldata _userAmounts) external onlyOwner whenPaused {
         _updateUserAmounts(_userAmounts);
     }

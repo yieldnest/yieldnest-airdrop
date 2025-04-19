@@ -19,18 +19,11 @@ contract BaseData is Script {
 
     ChainIds public chainIds = ChainIds({ mainnet: 1, holesky: 17_000, anvil: 31_337 });
 
-    address private TEMP_AIRDROP_OWNER;
-    address private TEMP_PROXY_CONTROLLER;
+    address public constant YN_DEV_MAINNET = 0xa08F39d30dc865CC11a49b6e5cBd27630D6141C3;
+    address public constant YN_DEV_HOLESKY = 0x72fdBD51085bDa5eEEd3b55D1a46E2e92f0837a5;
 
     function setUp() public virtual {
-        TEMP_AIRDROP_OWNER = makeAddr("airdrop-owner");
-        TEMP_PROXY_CONTROLLER = makeAddr("proxy-controller");
-
-        address YN_DEV_MAINNET = 0xa08F39d30dc865CC11a49b6e5cBd27630D6141C3;
-
         __data[chainIds.mainnet] = Data({ airdropOwner: YN_DEV_MAINNET, proxyAdminOwner: YN_DEV_MAINNET });
-
-        address YN_DEV_HOLESKY = 0x72fdBD51085bDa5eEEd3b55D1a46E2e92f0837a5;
 
         __data[chainIds.holesky] = Data({ airdropOwner: YN_DEV_HOLESKY, proxyAdminOwner: YN_DEV_HOLESKY });
     }
