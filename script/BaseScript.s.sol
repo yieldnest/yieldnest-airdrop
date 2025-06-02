@@ -3,10 +3,11 @@ pragma solidity >=0.8.25 <0.9.0;
 
 import { BaseData } from "./BaseData.s.sol";
 
+import { console } from "forge-std/console.sol";
 import { IERC20Metadata as IERC20 } from
     "lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
-import { UserAmount } from "../src/IAirdrop.sol";
+import { IntermediateUserAmount, UserAmount } from "../src/IAirdrop.sol";
 
 contract BaseScript is BaseData {
     Data public data;
@@ -40,7 +41,17 @@ contract BaseScript is BaseData {
         rewardsSafe = vm.parseJsonAddress(json, ".rewardsSafe");
 
         bytes memory parsedUserAmount = vm.parseJson(json, ".userAmounts");
-        UserAmount[] memory userAmount = abi.decode(parsedUserAmount, (UserAmount[]));
+        IntermediateUserAmount[] memory intermediateUserAmounts =
+            abi.decode(parsedUserAmount, (IntermediateUserAmount[]));
+        UserAmount[] memory userAmount = new UserAmount[](intermediateUserAmounts.length);
+
+        for (uint256 i; i < intermediateUserAmounts.length; i++) {
+            UserAmount memory userAmountItem = UserAmount({
+                user: intermediateUserAmounts[i].user,
+                amount: vm.parseUint(intermediateUserAmounts[i].amount)
+            });
+            userAmount[i] = userAmountItem;
+        }
 
         delete userAmounts;
 

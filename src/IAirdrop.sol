@@ -15,6 +15,11 @@ struct UserAmount {
     address user;
 }
 
+struct IntermediateUserAmount {
+    string amount;
+    address user;
+}
+
 /**
  * @title IAirdrop
  * @dev Interface for Airdrop contract with methods to claim and restake tokens, as well as getter functions

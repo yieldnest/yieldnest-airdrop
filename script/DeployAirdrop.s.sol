@@ -16,10 +16,10 @@ import { BatchUpdate } from "script/BatchUpdate.sol";
 import { ProxyUtils } from "script/ProxyUtils.sol";
 
 /**
-  source .env && forge script script/DeployAirdrop.s.sol:DeployAirdrop -s "run(string)"
-  script/inputs/season-one-eigen-holesky.json --rpc-url $HOLESKY_RPC_URL --sender $DEPLOYER_ADDRESS --account
-  $DEPLOYER_ACCOUNT_NAME --broadcast --verify --etherscan-api-key $ETHERSCAN_API_KEY
-*/
+ * source .env && forge script script/DeployAirdrop.s.sol:DeployAirdrop -s "run(string)"
+ *   script/inputs/season-one-eigen-holesky.json --rpc-url $HOLESKY_RPC_URL --sender $DEPLOYER_ADDRESS --account
+ *   $DEPLOYER_ACCOUNT_NAME --broadcast --verify --etherscan-api-key $ETHERSCAN_API_KEY
+ */
 contract DeployAirdrop is BaseScript, BatchUpdate {
     Airdrop public airdrop;
     Airdrop public airdropImpl;
