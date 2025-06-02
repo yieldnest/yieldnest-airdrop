@@ -1,6 +1,6 @@
 {
   "token": "0x7159cc276D7d17Ab4b3bEb19959E1F39368a45Ba",
-  "rewardsSafe": "insert safe address here",
+  "rewardsSafe": "0x281B76976E4DfDBf148Fe2A63D6cb54ccDf93368",
   "userAmounts": [
     {
       "addr": "0x1597E4B7cF6D2877A1d690b6088668afDb045763",
