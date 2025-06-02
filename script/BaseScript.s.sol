@@ -73,6 +73,11 @@ contract BaseScript is BaseData {
         if (totalAmount > initialSafeBalance) {
             revert InvalidInput();
         }
+
+        console.log("Initial safe balance: ", initialSafeBalance);
+        console.log("Total amount: ", totalAmount);
+        console.log("User amounts length: ", userAmounts.length);
+
         if (userAmounts.length == 0) {
             revert InvalidInput();
         }
