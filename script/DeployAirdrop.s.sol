@@ -8,14 +8,18 @@ import { TransparentUpgradeableProxy } from
     "lib/openzeppelin-contracts/contracts/proxy/transparent/TransparentUpgradeableProxy.sol";
 
 import { console } from "forge-std/console.sol";
+import { IERC20Metadata as IERC20 } from
+    "lib/openzeppelin-contracts/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 
 import { BaseScript } from "script/BaseScript.s.sol";
 import { BatchUpdate } from "script/BatchUpdate.sol";
 import { ProxyUtils } from "script/ProxyUtils.sol";
 
-// source .env && forge script script/DeployAirdrop.s.sol:DeployAirdrop -s "run(string)"
-// script/inputs/season-one-eigen-holesky.json --rpc-url $HOLESKY_RPC_URL --sender $DEPLOYER_ADDRESS --account
-// $DEPLOYER_ACCOUNT_NAME --broadcast --verify --etherscan-api-key $ETHERSCAN_API_KEY
+/**
+ * source .env && forge script script/DeployAirdrop.s.sol:DeployAirdrop -s "run(string)"
+ *   script/inputs/season-one-eigen-holesky.json --rpc-url $HOLESKY_RPC_URL --sender $DEPLOYER_ADDRESS --account
+ *   $DEPLOYER_ACCOUNT_NAME --broadcast --verify --etherscan-api-key $ETHERSCAN_API_KEY
+ */
 contract DeployAirdrop is BaseScript, BatchUpdate {
     Airdrop public airdrop;
     Airdrop public airdropImpl;
@@ -27,9 +31,14 @@ contract DeployAirdrop is BaseScript, BatchUpdate {
     function run(string memory _path) public {
         _loadInput(_path);
 
+        console.log("Token address: ", token);
+        console.log("Token symbol: ", IERC20(token).symbol());
+        console.log("Deployment file: ", _getDeploymentFile());
+
         _deploy();
         _verify();
         _save();
+        console.log("Deployment complete");
     }
 
     function _deploy() internal {
@@ -92,6 +101,7 @@ contract DeployAirdrop is BaseScript, BatchUpdate {
     }
 
     function _save() internal {
+        console.log("Saving deployment");
         string memory json;
         vm.serializeAddress(json, "airdropImplementation", address(airdropImpl));
         vm.serializeAddress(json, "airdropProxy", address(airdrop));

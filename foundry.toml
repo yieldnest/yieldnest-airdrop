@@ -15,7 +15,7 @@
     { access = "read", path = "./" },
   ]
   cache_path = "cache"
-  evm_version = "shanghai"
+  evm_version = "cancun"
   solc_version = "0.8.25"
   prompt_timeout = 120
 
