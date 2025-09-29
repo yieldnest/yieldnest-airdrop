@@ -14,11 +14,12 @@ contract BaseData is Script {
         uint256 holesky;
         uint256 anvil;
         uint256 base;
+        uint256 bnb;
     }
 
     mapping(uint256 chainId => Data data) private __data;
 
-    ChainIds public chainIds = ChainIds({ mainnet: 1, holesky: 17_000, anvil: 31_337, base: 8453 });
+    ChainIds public chainIds = ChainIds({ mainnet: 1, holesky: 17_000, anvil: 31_337, base: 8453, bnb: 56 });
 
     address public constant YN_SECURITYCOUNCIL_MAINNET = 0xfcad670592a3b24869C0b51a6c6FDED4F95D6975;
     address public constant YN_SECURITYCOUNCIL_HOLESKY = 0x72fdBD51085bDa5eEEd3b55D1a46E2e92f0837a5;
@@ -44,6 +45,7 @@ contract BaseData is Script {
     }
 
     function isSupportedChainId(uint256 chainId) internal view returns (bool) {
-        return chainId == chainIds.mainnet || chainId == chainIds.holesky || chainId == chainIds.base;
+        return chainId == chainIds.mainnet || chainId == chainIds.holesky || chainId == chainIds.base
+            || chainId == chainIds.bnb;
     }
 }
