@@ -22,6 +22,7 @@ contract BaseData is Script {
 
     address public constant YN_SECURITYCOUNCIL_MAINNET = 0xfcad670592a3b24869C0b51a6c6FDED4F95D6975;
     address public constant YN_SECURITYCOUNCIL_HOLESKY = 0x72fdBD51085bDa5eEEd3b55D1a46E2e92f0837a5;
+    address public constant YN_SECURITYCOUNCIL_BNB = 0x721688652DEa9Cabec70BD99411EAEAB9485d436;
 
     // test only
     address public constant YN_SECURITYCOUNCIL_TEST_BASE = 0x0d4ae80207c30E5489976d62661882A995b52155;
@@ -34,6 +35,8 @@ contract BaseData is Script {
             Data({ airdropOwner: YN_SECURITYCOUNCIL_HOLESKY, proxyAdminOwner: YN_SECURITYCOUNCIL_HOLESKY });
         __data[chainIds.base] =
             Data({ airdropOwner: YN_SECURITYCOUNCIL_TEST_BASE, proxyAdminOwner: YN_SECURITYCOUNCIL_TEST_BASE });
+        __data[chainIds.bnb] =
+            Data({ airdropOwner: YN_SECURITYCOUNCIL_BNB, proxyAdminOwner: YN_SECURITYCOUNCIL_BNB });
     }
 
     function getData(uint256 chainId) internal view returns (Data memory) {
